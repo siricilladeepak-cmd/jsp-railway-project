@@ -16,7 +16,7 @@ COPY src/ ./src/
 # Create build directory
 RUN mkdir -p build/classes
 
-# Compile Java classes with servlet-api from Tomcat
+# Compile Java classes with servlet-api
 RUN javac -cp /usr/local/tomcat/lib/servlet-api.jar -d build/classes src/com/virtual/*.java
 
 # Copy compiled classes to Tomcat WEB-INF/classes
