@@ -1,33 +1,33 @@
-# Use official Tomcat 9 image
+# Use Tomcat 9 base image
 FROM tomcat:9.0
-
-# Install JDK (required for compiling Java classes)
-RUN apt-get update && apt-get install -y openjdk-11-jdk && rm -rf /var/lib/apt/lists/*
 
 # Remove default webapps
 RUN rm -rf /usr/local/tomcat/webapps/*
 
-# Set working directory inside the container
+# Set working directory
 WORKDIR /usr/src/app
 
-# Copy JSP/HTML files to Tomcat ROOT
-COPY WebContent/ /usr/local/tomcat/webapps/ROOT/
+# Copy JSP/HTML files
+COPY WebContent/ ./WebContent/
 
-# Copy Java source code
-COPY src/ src/
+# Copy Java source files
+COPY src/ ./src/
 
-# Set CLASSPATH to include servlet API (required to compile servlets)
-ENV CLASSPATH=/usr/local/tomcat/lib/servlet-api.jar
+# Create build directory
+RUN mkdir -p build/classes
 
-# Compile Java classes and preserve package structure
-RUN mkdir -p build/classes \
-    && javac -cp /usr/local/tomcat/lib/servlet-api.jar -d build/classes src/com/virtual/*.java
+# Compile Java classes with servlet-api from Tomcat
+RUN javac -cp /usr/local/tomcat/lib/servlet-api.jar -d build/classes src/com/virtual/*.java
+
 # Copy compiled classes to Tomcat WEB-INF/classes
+RUN mkdir -p /usr/local/tomcat/webapps/ROOT/WEB-INF/classes
 RUN cp -r build/classes/* /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/
 
-# Expose Tomcat default port
+# Copy JSP/HTML into ROOT webapp
+RUN cp -r WebContent/* /usr/local/tomcat/webapps/ROOT/
+
+# Expose Tomcat port
 EXPOSE 8080
 
 # Start Tomcat
 CMD ["catalina.sh", "run"]
-
