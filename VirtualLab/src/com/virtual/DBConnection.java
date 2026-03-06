@@ -9,22 +9,29 @@ public class DBConnection {
         Connection con = null;
 
         try {
+
             Class.forName("com.mysql.cj.jdbc.Driver");
 
-            String url = System.getenv("DB_URL");
-            String user = System.getenv("DB_USER");
-            String password = System.getenv("DB_PASSWORD");
+            String host = System.getenv("MYSQL_ADDON_HOST");
 
-            // If environment variables not set, use localhost (for development)
-            if (url == null) {
-                url = "jdbc:mysql://localhost:3306/virtual_lab";
-                user = "root";
-                password = "root123";
+            if (host == null) {
+                // Local database (Eclipse)
+                con = DriverManager.getConnection(
+                        "jdbc:mysql://localhost:3306/virtual_lab",
+                        "root",
+                        "root"
+                );
+            } else {
+                // Cloud database
+                String db = System.getenv("MYSQL_ADDON_DB");
+                String user = System.getenv("MYSQL_ADDON_USER");
+                String password = System.getenv("MYSQL_ADDON_PASSWORD");
+                String port = System.getenv("MYSQL_ADDON_PORT");
+
+                String url = "jdbc:mysql://" + host + ":" + port + "/" + db;
+
+                con = DriverManager.getConnection(url, user, password);
             }
-
-            con = DriverManager.getConnection(url, user, password);
-
-            System.out.println("Database Connected Successfully");
 
         } catch (Exception e) {
             e.printStackTrace();
