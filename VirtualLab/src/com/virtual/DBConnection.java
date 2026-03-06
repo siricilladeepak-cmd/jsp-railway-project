@@ -12,26 +12,13 @@ public class DBConnection {
 
             Class.forName("com.mysql.cj.jdbc.Driver");
 
-            String host = System.getenv("MYSQL_ADDON_HOST");
+            String url = "jdbc:mysql://bu29wefvk7wf56njip0e-mysql.services.clever-cloud.com:3306/bu29wefvk7wf56njip0e";
+            String user = "utf2zovxkquuz29a";
+            String pass = "Db6QsS6e1MNbqof6qmw2";
 
-            if (host == null) {
-                // Local database (Eclipse)
-                con = DriverManager.getConnection(
-                        "jdbc:mysql://localhost:3306/virtual_lab",
-                        "root",
-                        "root"
-                );
-            } else {
-                // Cloud database
-                String db = System.getenv("MYSQL_ADDON_DB");
-                String user = System.getenv("MYSQL_ADDON_USER");
-                String password = System.getenv("MYSQL_ADDON_PASSWORD");
-                String port = System.getenv("MYSQL_ADDON_PORT");
+            con = DriverManager.getConnection(url, user, pass);
 
-                String url = "jdbc:mysql://" + host + ":" + port + "/" + db;
-
-                con = DriverManager.getConnection(url, user, password);
-            }
+            System.out.println("Connection successful");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -40,4 +27,3 @@ public class DBConnection {
         return con;
     }
 }
-
