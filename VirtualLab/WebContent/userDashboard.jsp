@@ -43,15 +43,13 @@ while(rsSubject.next()){
 
 if(weakSubject != null && lowestAvg < 60){
     String subQuery =
-    "SELECT st.id, st.name, AVG(qr.percentage) AS avgPercent " +
-    "FROM sub_topics st " +
-    "JOIN subjects s ON st.subject_id = s.id " +
-    "LEFT JOIN quiz_results qr ON st.id = qr.sub_topic_id AND qr.user_id=? " +
-    "WHERE s.name=? " +
-    "GROUP BY st.id, st.name " +
-    "HAVING AVG(qr.percentage) IS NOT NULL " +
-    "ORDER BY avgPercent ASC LIMIT 1";
-
+"SELECT st.id, st.name, AVG(qr.percentage) AS avgPercent " +
+"FROM sub_topics st " +
+"JOIN subjects s ON st.subject_id = s.id " +
+"JOIN quiz_results qr ON st.id = qr.sub_topic_id " +
+"WHERE qr.user_id=? AND s.name=? " +
+"GROUP BY st.id, st.name " +
+"ORDER BY avgPercent ASC LIMIT 1";
     PreparedStatement psSub = conn.prepareStatement(subQuery);
     psSub.setInt(1,userId);
     psSub.setString(2,weakSubject);
