@@ -33,13 +33,15 @@ ResultSet rsSubject = psSubject.executeQuery();
 
 while(rsSubject.next()){
     double avg = rsSubject.getDouble("avgPercent");
-    if(avg > 0 && avg < lowestAvg){
+
+    // ignore subjects not attempted
+    if(!rsSubject.wasNull() && avg < lowestAvg){
         lowestAvg = avg;
         weakSubject = rsSubject.getString("name");
     }
 }
 
-if(weakSubject != null){
+if(weakSubject != null && lowestAvg < 60){
     String subQuery =
     "SELECT st.id, st.name, AVG(qr.percentage) AS avgPercent " +
     "FROM sub_topics st " +
@@ -47,6 +49,7 @@ if(weakSubject != null){
     "LEFT JOIN quiz_results qr ON st.id = qr.sub_topic_id AND qr.user_id=? " +
     "WHERE s.name=? " +
     "GROUP BY st.id, st.name " +
+    "HAVING AVG(qr.percentage) IS NOT NULL " +
     "ORDER BY avgPercent ASC LIMIT 1";
 
     PreparedStatement psSub = conn.prepareStatement(subQuery);
@@ -61,6 +64,8 @@ if(weakSubject != null){
 
     rsSub.close();
     psSub.close();
+}else{
+    weakSubject = null;
 }
 
 rsSubject.close();
@@ -240,7 +245,7 @@ while(rsAll.next()){
         while(rsSubAll.next()){
     %>
 
-      <a href="<%=request.getContextPath()%>/QuizServlet?subTopicId=<%= rsSubAll.getInt("id") %>">
+        <a href="<%=request.getContextPath()%>/QuizServlet?subTopicId=<%= rsSubAll.getInt("id") %>">
             <%= rsSubAll.getString("name") %>
         </a>
 
@@ -250,7 +255,6 @@ while(rsAll.next()){
         psSubAll.close();
     %>
     </div>
-
 </div>
 
 <%
