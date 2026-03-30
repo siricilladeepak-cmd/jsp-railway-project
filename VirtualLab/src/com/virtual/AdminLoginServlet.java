@@ -24,6 +24,7 @@ public class AdminLoginServlet extends HttpServlet {
 
         try {
             Connection conn = DBConnection.getConnection();
+            System.out.println("DB URL = " + conn.getMetaData().getURL());
 
             String sql = "SELECT * FROM admin WHERE username=? AND password=?";
             PreparedStatement ps = conn.prepareStatement(sql);
