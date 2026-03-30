@@ -19,38 +19,40 @@ public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
+        String username = request.getParameter("username").trim();
+        String password = request.getParameter("password").trim();
         String loginType = request.getParameter("loginType"); // user or admin
 
         try {
             Connection conn = DBConnection.getConnection();
             System.out.println("LoginServlet DB connection called");
+String sql = "";
 
-            String sql = "SELECT * FROM users WHERE name=? AND password=?";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, username);
-            ps.setString(2, password);
+if(loginType.equals("admin")) {
+    sql = "SELECT * FROM admin WHERE username=? AND password=?";
+} else {
+    sql = "SELECT * FROM users WHERE name=? AND password=?";
+}
 
-            ResultSet rs = ps.executeQuery();
+PreparedStatement ps = conn.prepareStatement(sql);
+ps.setString(1, username);
+ps.setString(2, password);
 
-            if(rs.next()) {
-                String role = rs.getString("role");
+ResultSet rs = ps.executeQuery();
 
-                HttpSession session = request.getSession();
-                session.setAttribute("username", username);
-                session.setAttribute("role", role);
-                session.setAttribute("userId", rs.getInt("id"));
+if(rs.next()) {
+    HttpSession session = request.getSession();
 
-                if(role.equals("admin") && loginType.equals("admin")) {
-                    response.sendRedirect("adminDashboard.jsp");
-                } else if(role.equals("user") && loginType.equals("user")) {
-                    response.sendRedirect("userDashboard.jsp");
-                } else {
-                    session.invalidate();
-                    response.getWriter().println("You are not authorized to login as " + loginType);
-                }
-            } else {
+    if(loginType.equals("admin")) {
+        session.setAttribute("admin", username);
+        response.sendRedirect("adminDashboard.jsp");
+    } else {
+        session.setAttribute("username", rs.getString("name"));
+        session.setAttribute("userId", rs.getInt("id"));
+        response.sendRedirect("userDashboard.jsp");
+    }
+}
+            else {
                 response.getWriter().println("Invalid Username or Password");
             }
 
